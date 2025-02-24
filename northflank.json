@@ -40,7 +40,7 @@
             "secrets": {
               "variables": {
                 "API_SERVICE_BACKEND_URL_OPTIONS": "${args.API_SERVICE_BACKEND_URL_OPTIONS}",
-                "BASIC_AUTH": "${args.BASIC_AUTH}",
+                "BASIC_AUTH": "$(args.BASIC_AUTH}",
                 "CORS_HOST": "${args.CORS_HOST}",
                 "DUTY_CALCULATOR_BASE_URL": "${args.DUTY_CALCULATOR_BASE_URL}",
                 "ENVIRONMENT": "${args.ENVIRONMENT}",
