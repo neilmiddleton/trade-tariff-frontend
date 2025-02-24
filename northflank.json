@@ -1,0 +1,388 @@
+{
+  "apiVersion": "v1.2",
+  "spec": {
+    "kind": "Workflow",
+    "spec": {
+      "type": "sequential",
+      "steps": [
+        {
+          "kind": "Project",
+          "ref": "Frontend",
+          "spec": {
+            "networking": {
+              "tailscale": {
+                "authKeyTags": [],
+                "enabled": false
+              },
+              "allowedIngressProjects": []
+            },
+            "name": "Frontend",
+            "clusterId": "sleepy-smile",
+            "description": ""
+          }
+        },
+        {
+          "kind": "ResourceTag",
+          "spec": {
+            "name": "frontend",
+            "useSpotNodes": false,
+            "useOnDemandNodes": false,
+            "description": ""
+          },
+          "ref": "frontend"
+        },
+        {
+          "kind": "SecretGroup",
+          "spec": {
+            "type": "secret",
+            "secretType": "environment-arguments",
+            "priority": 10,
+            "secrets": {
+              "variables": {
+                "API_SERVICE_BACKEND_URL_OPTIONS": "${args.API_SERVICE_BACKEND_URL_OPTIONS}",
+                "BASIC_AUTH": "${args.BASIC_AUTH}",
+                "CORS_HOST": "${args.CORS_HOST}",
+                "DUTY_CALCULATOR_BASE_URL": "${args.DUTY_CALCULATOR_BASE_URL}",
+                "ENVIRONMENT": "${args.ENVIRONMENT}",
+                "GOOGLE_TAG_MANAGER_CONTAINER_ID": "${args.GOOGLE_TAG_MANAGER_CONTAINER_ID}",
+                "GOVUK_APP_DOMAIN": "${args.GOVUK_APP_DOMAIN}",
+                "GOVUK_WEBSITE_ROOT": "${args.GOVUK_WEBSITE_ROOT}",
+                "GREEN_LANES_API_TOKEN": "${args.GREEN_LANES_API_TOKEN}",
+                "GREEN_LANES_ENABLED": "${args.GREEN_LANES_ENABLED}",
+                "HOST": "${args.HOST}",
+                "MALLOC_ARENA_MAX": "${args.MALLOC_ARENA_MAX}",
+                "MAX_THREADS": "${args.MAX_THREADS}",
+                "NEW_RELIC_LICENSE_KEY": "${args.NEW_RELIC_LICENSE_KEY}",
+                "NEW_RELIG_LOG": "${args.NEW_RELIG_LOG}",
+                "RAILS_ENV": "${args.RAILS_ENV}",
+                "RAILS_SERVE_STATIC_FILES": "${args.RAILS_SERVE_STATIC_FILES}",
+                "REDIS_URL": "${args.REDIS_URL}",
+                "ROO_WIZARD": "${args.ROO_WIZARD}",
+                "RUBYOPT": "${args.RUBYOPT}",
+                "SECRET_KEY_BASE": "${args.SECRET_KEY_BASE}",
+                "SENTRY_DSN": "${args.SENTRY_DSN}",
+                "SENTRY_ENVIRONMENT": "${args.SENTRY_ENVIRONMENT}",
+                "SERVICE_DEFAULT": "${args.SERVICE_DEFAULT}",
+                "STW_URI": "${args.STW_URI}",
+                "TARIFF_API_VERSION": "${args.TARIFF_API_VERSION}",
+                "TARIFF_FROM_EMAIL": "${args.TARIFF_FROM_EMAIL}",
+                "TARIFF_SUPPORT_EMAIL": "${args.TARIFF_SUPPORT_EMAIL}",
+                "TARIFF_TO_EMAIL": "${args.TARIFF_TO_EMAIL}",
+                "WEB_CONCURRENCY": "${args.WEB_CONCURRENCY}",
+                "WEBCHAT_URL": "${args.WEBCHAT_URL}"
+              },
+              "files": {}
+            },
+            "addonDependencies": [],
+            "name": "frontend-secrets",
+            "tags": [
+              "${refs.frontend.id}"
+            ],
+            "restrictions": {
+              "restricted": false,
+              "nfObjects": [],
+              "tags": []
+            },
+            "projectId": "${refs.Frontend.id}"
+          },
+          "ref": "frontend-secrets"
+        },
+        {
+          "kind": "BuildService",
+          "spec": {
+            "buildArguments": {},
+            "buildFiles": {},
+            "billing": {
+              "buildPlan": "nf-compute-400-16"
+            },
+            "name": "frontend-builder",
+            "tags": [
+              "${refs.frontend.id}"
+            ],
+            "vcsData": {
+              "projectType": "github",
+              "accountLogin": "neilmiddleton",
+              "projectUrl": "https://github.com/neilmiddleton/trade-tariff-frontend"
+            },
+            "buildConfiguration": {
+              "prRestrictions": [
+                "*"
+              ],
+              "branchRestrictions": [
+                "main"
+              ]
+            },
+            "buildSettings": {
+              "dockerfile": {
+                "buildEngine": "kaniko",
+                "useCache": false,
+                "dockerWorkDir": "/",
+                "dockerFilePath": "/Dockerfile",
+                "buildkit": {
+                  "useInternalCache": false,
+                  "internalCacheStorage": 16384
+                }
+              }
+            },
+            "disabledCI": false,
+            "projectId": "${refs.Frontend.id}"
+          },
+          "ref": "frontend-builder"
+        },
+        {
+          "kind": "DeploymentService",
+          "spec": {
+            "deployment": {
+              "instances": 1,
+              "storage": {
+                "ephemeralStorage": {
+                  "storageSize": 1024
+                },
+                "shmSize": 64
+              },
+              "docker": {
+                "configType": "default"
+              },
+              "internal": {
+                "id": "${refs.frontend-builder.id}",
+                "branch": "main",
+                "buildSHA": "latest"
+              },
+              "releaseFlowControlled": true
+            },
+            "runtimeEnvironment": {},
+            "runtimeFiles": {},
+            "billing": {
+              "deploymentPlan": "nf-compute-100-1"
+            },
+            "name": "frontend-staging",
+            "tags": [
+              "${refs.frontend.id}"
+            ],
+            "ports": [
+              {
+                "internalPort": 8080,
+                "public": true,
+                "protocol": "HTTP",
+                "name": "p01",
+                "domains": [],
+                "security": {
+                  "sso": {},
+                  "policies": [],
+                  "credentials": [],
+                  "verificationMode": "or"
+                },
+                "disableNfDomain": false
+              }
+            ],
+            "projectId": "${refs.Frontend.id}"
+          },
+          "ref": "frontend-service"
+        },
+        {
+          "kind": "DeploymentService",
+          "spec": {
+            "deployment": {
+              "instances": 1,
+              "storage": {
+                "ephemeralStorage": {
+                  "storageSize": 1024
+                },
+                "shmSize": 64
+              },
+              "docker": {
+                "configType": "default"
+              },
+              "internal": {
+                "id": "${refs.frontend-builder.id}",
+                "branch": "main",
+                "buildSHA": "latest"
+              }
+            },
+            "runtimeEnvironment": {},
+            "runtimeFiles": {},
+            "billing": {
+              "deploymentPlan": "nf-compute-100-1"
+            },
+            "name": "frontend-prod",
+            "tags": [
+              "${refs.frontend.id}"
+            ],
+            "projectId": "${refs.Frontend.id}",
+            "ports": [
+              {
+                "internalPort": 8080,
+                "public": true,
+                "protocol": "HTTP",
+                "name": "p01",
+                "domains": [],
+                "security": {
+                  "sso": {},
+                  "policies": [],
+                  "credentials": [],
+                  "verificationMode": "or"
+                },
+                "disableNfDomain": false
+              }
+            ]
+          },
+          "ref": "frontend-prod"
+        },
+        {
+          "kind": "Pipeline",
+          "spec": {
+            "stages": [
+              {
+                "name": "Development"
+              },
+              {
+                "name": "Staging",
+                "nfObjects": [
+                  {
+                    "id": "${refs.frontend-service.id}",
+                    "type": "service"
+                  }
+                ]
+              },
+              {
+                "name": "Production",
+                "nfObjects": [
+                  {
+                    "id": "frontend-prod",
+                    "type": "service"
+                  }
+                ]
+              }
+            ],
+            "projectId": "${refs.Frontend.id}",
+            "name": "frontend-pipeline",
+            "preview": {
+              "kind": "PreviewEnv",
+              "spec": {
+                "apiVersion": "v1.2",
+                "spec": {
+                  "kind": "Workflow",
+                  "spec": {
+                    "type": "sequential",
+                    "steps": [
+                      {
+                        "kind": "BuildSource",
+                        "ref": "pr-builder",
+                        "spec": {
+                          "defaults": {},
+                          "reuseExistingBuilds": true,
+                          "branch": "${refs.trade-tariff-frontend.branch}",
+                          "buildOverrides": {
+                            "buildArguments": {}
+                          },
+                          "id": "${template.refs.frontend-builder.id}",
+                          "type": "service",
+                          "sha": "${refs.trade-tariff-frontend.sha}"
+                        },
+                        "condition": "success"
+                      },
+                      {
+                        "kind": "DeploymentService",
+                        "spec": {
+                          "deployment": {
+                            "instances": 1,
+                            "storage": {
+                              "ephemeralStorage": {
+                                "storageSize": 1024
+                              },
+                              "shmSize": 64
+                            },
+                            "docker": {
+                              "configType": "default"
+                            },
+                            "internal": {
+                              "id": "${refs.build-source-1.nfObjectId}",
+                              "branch": "${refs.build-source-1.branch}",
+                              "buildSHA": "${refs.build-source-1.sha}"
+                            }
+                          },
+                          "name": "${args.name}-",
+                          "tags": [
+                            "${args.previewId}",
+                            "${template.refs.frontend.id}"
+                          ],
+                          "runtimeEnvironment": {},
+                          "runtimeFiles": {},
+                          "billing": {
+                            "deploymentPlan": "nf-compute-100-1"
+                          },
+                          "ports": [
+                            {
+                              "internalPort": 8080,
+                              "public": true,
+                              "protocol": "HTTP",
+                              "name": "p01",
+                              "domains": [],
+                              "security": {
+                                "sso": {},
+                                "policies": [],
+                                "credentials": [],
+                                "verificationMode": "or"
+                              },
+                              "disableNfDomain": false
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "triggers": [
+                  {
+                    "ref": "trade-tariff-frontend",
+                    "vcsService": "github",
+                    "accountLogin": "neilmiddleton",
+                    "repoUrl": "https://github.com/neilmiddleton/trade-tariff-frontend",
+                    "branchRestrictions": [],
+                    "prRestrictions": [
+                      "*"
+                    ],
+                    "pathIgnoreRules": [],
+                    "ciIgnoreFlags": [
+                      "[skip ci]",
+                      "[ci skip]",
+                      "[no ci]",
+                      "[skip nf]",
+                      "[nf skip]",
+                      "[northflank skip]",
+                      "[skip northflank]"
+                    ],
+                    "ciIgnoreFlagsEnabled": true,
+                    "isAllowList": false,
+                    "ignoreDrafts": false
+                  }
+                ],
+                "options": {
+                  "concurrencyPolicy": "allow",
+                  "nameFormat": "PR-${args.pullRequestId}",
+                  "schedule": {}
+                }
+              }
+            }
+          },
+          "ref": "frontend-pipeline"
+        }
+      ]
+    }
+  },
+  "name": "Frontend template",
+  "description": "",
+  "options": {
+    "autorun": true,
+    "concurrencyPolicy": "allow",
+    "runOnUpdate": false
+  },
+  "gitops": {
+    "repoUrl": "https://github.com/neilmiddleton/trade-tariff-frontend",
+    "vcsService": "github",
+    "accountLogin": "neilmiddleton",
+    "branch": "main",
+    "filePath": "/northflank.json"
+  },
+  "$schema": "https://api.northflank.com/v1/schemas/template"
+}
