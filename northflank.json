@@ -267,7 +267,7 @@
                     "steps": [
                       {
                         "kind": "BuildSource",
-                        "ref": "pr-builder",
+                        "ref": "build-source-1",
                         "spec": {
                           "defaults": {},
                           "reuseExistingBuilds": true,
@@ -275,7 +275,7 @@
                           "buildOverrides": {
                             "buildArguments": {}
                           },
-                          "id": "frontend-builder",
+                          "id": "${template.refs.frontend-builder.id}",
                           "type": "service",
                           "sha": "${refs.trade-tariff-frontend.sha}"
                         },
@@ -296,15 +296,14 @@
                               "configType": "default"
                             },
                             "internal": {
-                              "id": "${refs.pr-builder.nfObjectId}",
-                              "branch": "${refs.pr-builder.branch}",
-                              "buildSHA": "${refs.pr-builder.sha}"
+                              "id": "${refs.build-source-1.nfObjectId}",
+                              "branch": "${refs.build-source-1.branch}",
+                              "buildSHA": "${refs.build-source-1.sha}"
                             }
                           },
-                          "name": "${args.name}-",
+                          "name": "${args.name}-pr-deployer",
                           "tags": [
-                            "${args.previewId}",
-                            "${template.refs.frontend.id}"
+                            "${args.previewId}"
                           ],
                           "runtimeEnvironment": {},
                           "runtimeFiles": {},
@@ -327,7 +326,8 @@
                               "disableNfDomain": false
                             }
                           ]
-                        }
+                        },
+                        "ref": "pr-deployer"
                       }
                     ]
                   }
