@@ -52,7 +52,6 @@
                 "HOST": "${args.HOST}",
                 "MALLOC_ARENA_MAX": "${args.MALLOC_ARENA_MAX}",
                 "MAX_THREADS": "${args.MAX_THREADS}",
-                "NEW_RELIC_LICENSE_KEY": "${args.NEW_RELIC_LICENSE_KEY}",
                 "NEW_RELIG_LOG": "${args.NEW_RELIG_LOG}",
                 "RAILS_ENV": "${args.RAILS_ENV}",
                 "RAILS_SERVE_STATIC_FILES": "${args.RAILS_SERVE_STATIC_FILES}",
