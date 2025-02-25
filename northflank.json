@@ -196,7 +196,8 @@
                 "id": "${refs.frontend-builder.id}",
                 "branch": "main",
                 "buildSHA": "latest"
-              }
+              },
+              "releaseFlowControlled": true
             },
             "runtimeEnvironment": {},
             "runtimeFiles": {},
@@ -274,7 +275,7 @@
                           "buildOverrides": {
                             "buildArguments": {}
                           },
-                          "id": "${template.refs.frontend-builder.id}",
+                          "id": "frontend-builder",
                           "type": "service",
                           "sha": "${refs.trade-tariff-frontend.sha}"
                         },
@@ -295,9 +296,9 @@
                               "configType": "default"
                             },
                             "internal": {
-                              "id": "${refs.build-source-1.nfObjectId}",
-                              "branch": "${refs.build-source-1.branch}",
-                              "buildSHA": "${refs.build-source-1.sha}"
+                              "id": "${refs.pr-builder.nfObjectId}",
+                              "branch": "${refs.pr-builder.branch}",
+                              "buildSHA": "${refs.pr-builder.sha}"
                             }
                           },
                           "name": "${args.name}-",
